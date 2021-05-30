@@ -7,6 +7,32 @@ let currentPage = 1;
 let totalResults;
 let movies;
 
+const renderResults = (movies) => {
+  resultsEl.innerHTML = (
+    movies.map( movie => (
+      `
+        <li class="component-search__wrap-movie" data-genres="${movie.genre_ids}">
+          <div class="component-search__wrap-picture">
+              <picture>
+                <img src="https://www.themoviedb.org/t/p/w440_and_h660_face${movie.poster_path}" alt="">
+              <picture>
+          </div>
+          <div class="component-search__wrap-texts">
+            <h3 class="component-search__wrap-title">${movie.original_title}</h3>
+            <p></p>
+          </div>
+        </li>
+      `
+    )).join('')
+  )
+};
+
+const renderResponse = response => {
+  loaderEl.classList.remove('is-active');
+  counterEl.innerHTML = `${response.length} resultats`;
+
+  response ? renderResults(response) : null;
+};
 
 const fetchSearch = async(value) =>{
 
@@ -22,30 +48,34 @@ const fetchSearch = async(value) =>{
   .then( data =>  {
     
     if(data){
+
       totalResults = data.total_results;
-      console.log(data, totalResults, data.results);
-      return data.results;
+      movies = data.results.map( element => element );
+      movies ? renderResponse(movies) : null;
+
     }
   })
   .catch( error => {
     console.log(error);
   })
-}
+};
 
 const previewSearch = async({target}) => {
   loaderEl.classList.remove('is-active');
+  counterEl.innerHTML = '';
 
-  if(target.value.trim().lenght === 0) {
+  if(target.value.trim().length === 0) {
     return;
   }
+
   if(target.value.length > 2) {
     loaderEl.classList.add('is-active');
     await fetchSearch(target.value);
   }
-}
+};
 
 window.addEventListener('load', () => {
   inputEl.addEventListener('keyup', previewSearch);
-})
+});
 
 
